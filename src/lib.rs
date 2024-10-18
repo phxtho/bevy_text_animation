@@ -1,6 +1,6 @@
-use std::{any::Any, time::Duration};
+use std::time::Duration;
 
-use bevy::{prelude::*, utils::tracing::event};
+use bevy::prelude::*;
 
 pub struct TextAnimatorPlugin;
 
@@ -25,38 +25,51 @@ fn text_simple_animator_system(
                     animator.state = TextAnimationState::Stopped;
 
                     if animator.secs_wait_until_finish > 0.0 {
-                        animator.end_timer = Some(Timer::from_seconds(animator.secs_wait_until_finish, TimerMode::Once));
+                        animator.end_timer = Some(Timer::from_seconds(
+                            animator.secs_wait_until_finish,
+                            TimerMode::Once,
+                        ));
                         animator.state = TextAnimationState::Stopped;
-                    }else{
+                    } else {
                         events.send(TextAnimationFinished { entity });
                     }
-                }else{
-                    let val = utf8_slice::slice(&animator.text, 0, (animator.timer.elapsed().as_secs_f64() * animator.speed as f64) as usize);
+                } else {
+                    let val = utf8_slice::slice(
+                        &animator.text,
+                        0,
+                        (animator.timer.elapsed().as_secs_f64() * animator.speed as f64) as usize,
+                    );
                     if animator.fill_spaces {
                         let len = animator.max_text_length();
-                        let v  = format!("{}{}", val, animator.fill_spaces_char.repeat(len - utf8_slice::len(&val)));
+                        let v = format!(
+                            "{}{}",
+                            val,
+                            animator
+                                .fill_spaces_char
+                                .repeat(len - utf8_slice::len(&val))
+                        );
                         text.sections[0].value = v;
-                    }else{
+                    } else {
                         text.sections[0].value = val.to_string();
                     }
                 }
-            },
+            }
             TextAnimationState::Waiting(wait) => {
                 if !text.sections[0].value.is_empty() {
                     if animator.fill_spaces {
                         let len = animator.max_text_length();
-                        let val  = animator.fill_spaces_char.repeat(len);
+                        let val = animator.fill_spaces_char.repeat(len);
                         text.sections[0].value = val;
                     }
                     text.sections[0].value = "".to_string();
                 }
                 if wait <= 0.0 {
                     animator.state = TextAnimationState::Playing;
-                }else{
+                } else {
                     let t = wait - time.delta_seconds();
                     if t <= 0.0 {
                         animator.state = TextAnimationState::Playing;
-                    }else{
+                    } else {
                         animator.state = TextAnimationState::Waiting(t);
                     }
                 }
@@ -88,7 +101,7 @@ pub enum TextAnimationState {
     Stopped,
     Paused,
     #[default]
-    Playing
+    Playing,
 }
 
 /// animates text by showing one letter at a time, like a typewriter.
@@ -174,9 +187,12 @@ impl TextSimpleAnimator {
         self.state = TextAnimationState::Waiting(secs);
         self
     }
-    
+
     fn reset_timer(&mut self) {
-        self.timer = Timer::new(Self::_calc_duration(self.max_text_length(), self.speed), TimerMode::Once);
+        self.timer = Timer::new(
+            Self::_calc_duration(self.max_text_length(), self.speed),
+            TimerMode::Once,
+        );
     }
 
     /// play with waiting for x seconds before playing
@@ -230,7 +246,7 @@ impl TextSimpleAnimator {
     pub fn is_waiting(&self) -> bool {
         matches!(self.state, TextAnimationState::Waiting(_))
     }
-} 
+}
 
 impl Default for TextSimpleAnimator {
     fn default() -> Self {

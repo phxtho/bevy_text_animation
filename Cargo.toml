@@ -11,17 +11,15 @@ license = "WTFPL"
 default = []
 
 [dev-dependencies]
-bevy = { version = "0.13", default-features = false, features = [
+bevy = { version = "0.14", default-features = false, features = [
     "bevy_asset",
     "bevy_winit",
     "bevy_render",
     "bevy_text",
     "bevy_ui",
-    "default_font"
+    "default_font",
 ] }
 
 [dependencies]
-bevy = { version = "0.13", default-features = false, features = [
-    "bevy_text",
-] }
+bevy = { version = "0.14", default-features = false, features = ["bevy_text"] }
 utf8_slice = "1.0.0"
